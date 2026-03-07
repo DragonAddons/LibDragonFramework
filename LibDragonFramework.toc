@@ -1,0 +1,41 @@
+## Interface: 110207, 120001, 120000
+## Interface-BCC: 20505
+## Interface-Mists: 50502, 50503
+## Title: LibDragonFramework
+## Notes: Shared options UI framework for Dragon addons
+## Author: Xerrion
+## Version: @project-version@
+## X-Category: Libraries
+## X-License: MIT
+
+Init.lua
+
+Core\PixelPerfect.lua
+Core\BaseMixin.lua
+Core\ObjectPool.lua
+
+Theme\Tokens.lua
+Theme\Typography.lua
+Theme\Backdrop.lua
+Theme\Quality.lua
+Theme\Spacing.lua
+
+Engine\Bindings.lua
+Engine\Validation.lua
+Engine\Layout.lua
+
+Display\Window.lua
+Display\ScrollFrame.lua
+Display\TabGroup.lua
+Display\Section.lua
+
+Widgets\Header.lua
+Widgets\Description.lua
+Widgets\Toggle.lua
+Widgets\Slider.lua
+Widgets\Dropdown.lua
+Widgets\ColorPicker.lua
+Widgets\TextInput.lua
+Widgets\Button.lua
+Widgets\ItemSlot.lua
+Widgets\ItemList.lua

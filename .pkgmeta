@@ -1,0 +1,11 @@
+package-as: LibDragonFramework
+enable-toc-creation: yes
+
+ignore:
+    - .git*
+    - .luacheckrc
+    - .release
+    - "*.md"
+    - "*.png"
+    - .github
+    - spec

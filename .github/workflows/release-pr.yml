@@ -1,0 +1,7 @@
+name: Release PR
+on:
+  push:
+    branches: [master]
+jobs:
+  release-pr:
+    uses: DragonAddons/wow-workflows/.github/workflows/release-pr.yml@main
