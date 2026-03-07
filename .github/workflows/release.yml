@@ -1,14 +1,21 @@
 name: Release
+
 on:
   push:
     tags: ["*"]
   workflow_dispatch:
     inputs:
       tag_name:
-        description: "Tag name"
+        description: "Tag to package (e.g. 1.0.1)"
         required: true
+        type: string
+
+permissions:
+  contents: write
+
 jobs:
   release:
     uses: DragonAddons/wow-workflows/.github/workflows/release.yml@main
     with:
-      tag_name: ${{ inputs.tag_name || github.ref_name }}
+      tag_name: ${{ inputs.tag_name || '' }}
+    secrets: inherit
