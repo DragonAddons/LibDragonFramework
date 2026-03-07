@@ -154,6 +154,13 @@ function LDF.SetBorderWidth(region, width)
         backdrop.edgeSize = snapped
         backdrop.insets = { left = snapped, right = snapped, top = snapped, bottom = snapped }
         region:SetBackdrop(backdrop)
+
+        -- Re-apply colors since SetBackdrop() resets them to white
+        local data = region._ldf
+        if data and data._backdropStyle then
+            region:SetBackdropColor(LDF.GetColor(data._backdropStyle.bg))
+            region:SetBackdropBorderColor(LDF.GetColor(data._backdropStyle.border))
+        end
     end
 end
 
