@@ -5,7 +5,7 @@ Shared options UI framework for Dragon addons. No Ace3 dependencies.
 ## Build / Lint
 
 ```bash
-C:\\Users\\lasse\\scoop\\apps\\luarocks\\current\\rocks\\bin\\luacheck.bat .
+luacheck .
 ```
 
 - `std = "lua51"`, `max_line_length = 120`, `codes = true`
