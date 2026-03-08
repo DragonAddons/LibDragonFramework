@@ -24,6 +24,14 @@ function LDF.CreateStackLayout(parent, direction, spacing)
     local stack = CreateFrame("Frame", nil, parent)
     LDF.DisablePixelSnap(stack)
 
+    if (direction or "vertical") == "vertical" then
+        stack:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, 0)
+        stack:SetPoint("RIGHT", parent, "RIGHT")
+    else
+        stack:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, 0)
+        stack:SetPoint("BOTTOM", parent, "BOTTOM")
+    end
+
     stack._ldf = {
         direction = direction or "vertical",
         spacing = spacing or LDF.spacing.MD,
@@ -104,6 +112,12 @@ function LDF.CreateStackLayout(parent, direction, spacing)
                     child:SetPoint("TOPLEFT", prevVisible, "BOTTOMLEFT", 0, -gap)
                 else
                     child:SetPoint("TOPLEFT", prevVisible, "TOPRIGHT", gap, 0)
+                end
+
+                if isVertical then
+                    child:SetPoint("RIGHT", self, "RIGHT")
+                else
+                    child:SetPoint("BOTTOM", self, "BOTTOM")
                 end
 
                 local childW = child:GetWidth() or 0
