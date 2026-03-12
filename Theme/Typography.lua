@@ -49,13 +49,15 @@ local PRESET_COLORS = {
     meta  = { 0.5, 0.5, 0.5 },
 }
 
+local SHADOW = { 0, 0, 0, 1, 1, -1 } -- r, g, b, a, offsetX, offsetY
+
 -------------------------------------------------------------------------------
 -- Font presets
 -------------------------------------------------------------------------------
 
 LDF.fonts = {
-    title = { FONT_PATH, 14, "OUTLINE" },
-    body  = { FONT_PATH, 12, "" },
+    title = { FONT_PATH, 14, "" },
+    body  = { FONT_PATH, 13, "" },
     small = { FONT_PATH, 11, "" },
     meta  = { FONT_PATH, 10, "" },
 }
@@ -78,6 +80,9 @@ local function GetFontObject(presetName)
     local color = PRESET_COLORS[presetName]
     if color then fontObj:SetTextColor(color[1], color[2], color[3]) end
 
+    fontObj:SetShadowColor(SHADOW[1], SHADOW[2], SHADOW[3], SHADOW[4])
+    fontObj:SetShadowOffset(SHADOW[5], SHADOW[6])
+
     fontObjectCache[presetName] = fontObj
     return fontObj
 end
@@ -96,6 +101,9 @@ local function ApplyPreset(fs, presetName)
 
     local color = PRESET_COLORS[presetName]
     if color then fs:SetTextColor(color[1], color[2], color[3]) end
+
+    fs:SetShadowColor(SHADOW[1], SHADOW[2], SHADOW[3], SHADOW[4])
+    fs:SetShadowOffset(SHADOW[5], SHADOW[6])
 end
 
 -------------------------------------------------------------------------------

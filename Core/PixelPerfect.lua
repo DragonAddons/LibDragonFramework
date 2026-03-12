@@ -16,6 +16,7 @@ local math_abs = math.abs
 local UIParent = UIParent
 local C_Timer = C_Timer
 local pairs = pairs
+local type = type
 
 -------------------------------------------------------------------------------
 -- Core math
@@ -187,6 +188,17 @@ end
 local autoUpdaters = {}
 local onShowUpdaters = {}
 
+local function RunPixelUpdate(region)
+    if not region then return end
+
+    if type(region.UpdatePixels) == "function" then
+        region:UpdatePixels()
+        return
+    end
+
+    LDF.UpdatePixels(region)
+end
+
 function LDF.AddToPixelUpdater(region, group)
     if not region then error("AddToPixelUpdater: 'region' must not be nil", 2) end
 
@@ -195,7 +207,7 @@ function LDF.AddToPixelUpdater(region, group)
     elseif group == "onshow" then
         onShowUpdaters[region] = true
         region:HookScript("OnShow", function(self)
-            LDF.UpdatePixels(self)
+            RunPixelUpdate(self)
         end)
     else
         error("AddToPixelUpdater: 'group' must be \"auto\" or \"onshow\"", 2)
@@ -216,11 +228,11 @@ local pendingTimer = nil
 
 local function OnScaleChanged()
     for region in pairs(autoUpdaters) do
-        LDF.UpdatePixels(region)
+        RunPixelUpdate(region)
     end
     for region in pairs(onShowUpdaters) do
         if region:IsShown() then
-            LDF.UpdatePixels(region)
+            RunPixelUpdate(region)
         end
     end
     pendingTimer = nil

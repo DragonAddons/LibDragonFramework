@@ -7,9 +7,6 @@
 
 local LDF = LibDragonFramework
 
--- WoW API cache
-local CreateFrame = CreateFrame
-
 -------------------------------------------------------------------------------
 -- Factory: CreateButton
 -------------------------------------------------------------------------------
@@ -24,9 +21,7 @@ function LDF.CreateButton(parent, opts)
     -- Create flat button
     ---------------------------------------------------------------------------
 
-    local btn = CreateFrame("Button", nil, parent, "BackdropTemplate")
-    btn._ldf = {}
-    LDF.DisablePixelSnap(btn)
+    local btn = LDF.CreateBackdropFrame(parent, "Button")
     btn:SetSize(width, LDF.heights.CONTROL)
 
     LDF.ApplyBackdrop(btn, "button")
@@ -39,7 +34,7 @@ function LDF.CreateButton(parent, opts)
     -- Hover highlight
     local highlight = btn:CreateTexture(nil, "HIGHLIGHT")
     highlight:SetAllPoints()
-    highlight:SetColorTexture(1, 1, 1, 0.08)
+    highlight:SetColorTexture(LDF.GetColor("highlight"))
 
     -- Pressed visual offset
     btn:SetScript("OnMouseDown", function(self)

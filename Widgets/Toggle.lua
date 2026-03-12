@@ -7,9 +7,6 @@
 
 local LDF = LibDragonFramework
 
--- WoW API cache
-local CreateFrame = CreateFrame
-
 -------------------------------------------------------------------------------
 -- Constants
 -------------------------------------------------------------------------------
@@ -33,7 +30,7 @@ function LDF.CreateToggle(parent, opts)
     -- Checkbox box
     ---------------------------------------------------------------------------
 
-    local box = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+    local box = LDF.CreateBackdropFrame(frame, "Frame")
     box:SetSize(BOX_SIZE, BOX_SIZE)
     box:SetPoint("LEFT", frame, "LEFT", 0, 0)
     LDF.ApplyBackdrop(box, "widget")
@@ -49,7 +46,7 @@ function LDF.CreateToggle(parent, opts)
     -- Highlight on hover
     local highlight = box:CreateTexture(nil, "HIGHLIGHT")
     highlight:SetAllPoints()
-    highlight:SetColorTexture(1, 1, 1, 0.08)
+    highlight:SetColorTexture(LDF.GetColor("highlight"))
 
     ---------------------------------------------------------------------------
     -- Label
@@ -65,7 +62,7 @@ function LDF.CreateToggle(parent, opts)
     frame._ldf.checked = false
     frame._ldf.box = box
     frame._ldf.checkFill = checkFill
-    frame._ldf.label = label
+    frame._ldf.labelFS = label
 
     ---------------------------------------------------------------------------
     -- GetValue / SetValue

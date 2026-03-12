@@ -7,6 +7,9 @@
 
 local LIB_NAME, LDF = ...
 
+local geterrorhandler = geterrorhandler
+local pcall = pcall
+
 -- Version info
 LDF.version = "@project-version@"
 LDF.major = "LibDragonFramework"
@@ -77,7 +80,11 @@ function LDF.FireCallback(event, ...)
     end
 
     for _key, fn in pairs(handlers) do
-        fn(...)
+        local ok, err = pcall(fn, ...)
+        if not ok and err then
+            -- Report but don't block other handlers
+            geterrorhandler()(err)
+        end
     end
 end
 

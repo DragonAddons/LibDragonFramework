@@ -57,9 +57,8 @@ end
 -------------------------------------------------------------------------------
 
 local function CreateAddSlot(parent, slotSize)
-    local slot = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+    local slot = LDF.CreateBackdropFrame(parent, "Frame")
     slot:SetSize(slotSize, slotSize)
-    LDF.DisablePixelSnap(slot)
     slot:SetBackdrop({ bgFile = LDF.WHITE8X8, edgeFile = LDF.WHITE8X8, edgeSize = 1 })
     slot:SetBackdropColor(ADD_SLOT_BG[1], ADD_SLOT_BG[2], ADD_SLOT_BG[3], ADD_SLOT_BG[4])
     slot:SetBackdropBorderColor(
@@ -166,7 +165,7 @@ function LDF.CreateItemList(parent, opts)
     -- Label
     local label = LDF.CreateFontString(list, "small", opts.label or "")
     label:SetPoint("TOPLEFT", list, "TOPLEFT", 0, 0)
-    list._ldf.label = label
+    list._ldf.labelFS = label
 
     -- Count display
     local countText = LDF.CreateFontString(list, "small", "")

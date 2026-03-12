@@ -116,16 +116,24 @@ function LDF.CreateTabGroup(parent, tabs)
     end
 
     -- Separator line below tab bar
-    local separator = tabBar:CreateTexture(nil, "ARTWORK")
+    local separator = tabBar:CreateTexture(nil, "ARTWORK", nil, 0)
     separator:SetHeight(1)
     separator:SetPoint("TOPLEFT", tabBar, "BOTTOMLEFT")
     separator:SetPoint("TOPRIGHT", tabBar, "BOTTOMRIGHT")
     separator:SetTexture(LDF.WHITE8X8)
     separator:SetVertexColor(LDF.GetColor("border"))
 
+    -- Shadow line below separator for depth
+    local shadowLine = tabBar:CreateTexture(nil, "ARTWORK", nil, 1)
+    shadowLine:SetHeight(1)
+    shadowLine:SetPoint("TOPLEFT", separator, "BOTTOMLEFT")
+    shadowLine:SetPoint("TOPRIGHT", separator, "BOTTOMRIGHT")
+    shadowLine:SetTexture(LDF.WHITE8X8)
+    shadowLine:SetVertexColor(LDF.GetColor("shadow"))
+
     -- Content area below separator
     local contentArea = CreateFrame("Frame", nil, tabGroup)
-    contentArea:SetPoint("TOPLEFT", tabBar, "BOTTOMLEFT", 0, -(1 + LDF.spacing.SM))
+    contentArea:SetPoint("TOPLEFT", tabBar, "BOTTOMLEFT", 0, -(2 + LDF.spacing.SM))
     contentArea:SetPoint("BOTTOMRIGHT", tabGroup, "BOTTOMRIGHT", 0, 0)
     LDF.DisablePixelSnap(contentArea)
 

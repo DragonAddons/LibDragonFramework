@@ -166,7 +166,7 @@ local function EnsureSingleton()
     overlay:EnableMouse(true)
     overlay:Hide()
     overlay:SetScript("OnClick", CloseActiveDropdown)
-    listFrame = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
+    listFrame = LDF.CreateBackdropFrame(UIParent, "Frame")
     listFrame:SetFrameStrata("FULLSCREEN")
     listFrame:SetFrameLevel(200)
     LDF.ApplyBackdrop(listFrame, "dark")
@@ -247,11 +247,11 @@ function LDF.CreateDropdown(parent, opts)
     local label = LDF.CreateFontString(frame, "small", opts.label or "")
     label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
 
-    local button = CreateFrame("Button", nil, frame, "BackdropTemplate")
+    local button = LDF.CreateBackdropFrame(frame, "Button")
     button:SetSize((opts.width or BUTTON_WIDTH), BUTTON_HEIGHT)
     button:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -16)
     LDF.ApplyBackdrop(button, "widget")
-    LDF.SetBackdropHighlight(button)
+    LDF.SetBackdropHighlight(button, "borderLight", "highlight")
 
     local selText = LDF.CreateFontString(button, "body")
     selText:SetPoint("LEFT", button, "LEFT", 6, 0)
@@ -264,7 +264,7 @@ function LDF.CreateDropdown(parent, opts)
 
     frame._ldf.button = button
     frame._ldf.selectedText = selText
-    frame._ldf.label = label
+    frame._ldf.labelFS = label
     frame._ldf.arrow = arrow
 
     button:SetScript("OnClick", function()
@@ -275,9 +275,6 @@ function LDF.CreateDropdown(parent, opts)
     frame:SetScript("OnHide", function(self)
         if activeDropdown == self then
             CloseActiveDropdown()
-        elseif listFrame then
-            listFrame:Hide()
-            if overlay then overlay:Hide() end
         end
     end)
 
@@ -286,7 +283,6 @@ function LDF.CreateDropdown(parent, opts)
     end
 
     function frame:SetValue(v)
-        if opts.set then opts.set(v) end
         local vals = ResolveValues(opts)
         self._ldf.selectedText:SetText(FindDisplayText(vals, v))
         UpdateSelectedPreview(self, opts, v)

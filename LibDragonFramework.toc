@@ -17,6 +17,7 @@ Core\ObjectPool.lua
 Theme\Tokens.lua
 Theme\Typography.lua
 Theme\Backdrop.lua
+Theme\Glow.lua
 Theme\Quality.lua
 Theme\Spacing.lua
 

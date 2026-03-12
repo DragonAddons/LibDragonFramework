@@ -7,9 +7,8 @@
 
 local LDF = LibDragonFramework
 
--- WoW API cache
-local CreateFrame = CreateFrame
 local format = string.format
+local math_max = math.max
 
 -------------------------------------------------------------------------------
 -- Constants
@@ -62,7 +61,7 @@ function LDF.CreateSlider(parent, opts)
     -- Slider
     ---------------------------------------------------------------------------
 
-    local slider = CreateFrame("Slider", nil, frame, "BackdropTemplate")
+    local slider = LDF.CreateBackdropFrame(frame, "Slider")
     slider:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -SM)
     slider:SetPoint("RIGHT", frame, "RIGHT", -(EDITBOX_WIDTH + MD), 0)
     slider:SetHeight(SLIDER_HEIGHT)
@@ -79,6 +78,15 @@ function LDF.CreateSlider(parent, opts)
     LDF.DisablePixelSnap(thumb)
     slider:SetThumbTexture(thumb)
 
+    -- Progress fill (accent bar from left to thumb)
+    local fill = slider:CreateTexture(nil, "ARTWORK")
+    fill:SetColorTexture(LDF.GetColor("accentGold"))
+    fill:SetAlpha(0.25)
+    LDF.SetPoint(fill, "TOPLEFT", slider, "TOPLEFT", 1, -1)
+    LDF.SetPoint(fill, "BOTTOM", slider, "BOTTOM", 0, 1)
+    fill:SetWidth(1)
+    LDF.DisablePixelSnap(fill)
+
     ---------------------------------------------------------------------------
     -- Min / Max labels
     ---------------------------------------------------------------------------
@@ -93,7 +101,7 @@ function LDF.CreateSlider(parent, opts)
     -- EditBox
     ---------------------------------------------------------------------------
 
-    local editBox = CreateFrame("EditBox", nil, frame, "BackdropTemplate")
+    local editBox = LDF.CreateBackdropFrame(frame, "EditBox")
     editBox:SetSize(EDITBOX_WIDTH, 20)
     editBox:SetPoint("LEFT", slider, "RIGHT", MD, 0)
     LDF.ApplyBackdrop(editBox, "input")
@@ -112,6 +120,22 @@ function LDF.CreateSlider(parent, opts)
     end
 
     ---------------------------------------------------------------------------
+    -- Internal: update fill width to match current position
+    ---------------------------------------------------------------------------
+
+    local function UpdateFill(raw)
+        local range = maxVal - minVal
+        if range <= 0 then
+            fill:SetWidth(1)
+            return
+        end
+        local pct = (raw - minVal) / range
+        local trackWidth = slider:GetWidth() - 2
+        if trackWidth <= 0 then fill:SetWidth(1); return end
+        fill:SetWidth(math_max(1, trackWidth * pct))
+    end
+
+    ---------------------------------------------------------------------------
     -- Two-phase commit: Slider scripts
     ---------------------------------------------------------------------------
 
@@ -121,6 +145,7 @@ function LDF.CreateSlider(parent, opts)
         rounded = LDF.Clamp(rounded, minVal, maxVal)
         frame._ldf.currentValue = rounded
         UpdateEditBoxText(rounded)
+        UpdateFill(rounded)
         if not frame._ldf.isInternal then
             frame:FireValueChanged(rounded)
         end
@@ -234,7 +259,8 @@ function LDF.CreateSlider(parent, opts)
 
     frame._ldf.slider = slider
     frame._ldf.editBox = editBox
-    frame._ldf.label = label
+    frame._ldf.labelFS = label
+    frame._ldf.fill = fill
 
     ---------------------------------------------------------------------------
     -- Initialize

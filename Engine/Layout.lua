@@ -24,10 +24,20 @@ function LDF.CreateStackLayout(parent, direction, spacing)
     local stack = CreateFrame("Frame", nil, parent)
     LDF.DisablePixelSnap(stack)
 
+    if (direction or "vertical") == "vertical" then
+        stack:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, 0)
+        stack:SetPoint("RIGHT", parent, "RIGHT")
+    else
+        stack:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, 0)
+        stack:SetPoint("BOTTOM", parent, "BOTTOM")
+    end
+
     stack._ldf = {
         direction = direction or "vertical",
         spacing = spacing or LDF.spacing.MD,
         children = {},
+        _refreshing = false,
+        _dirty = false,
     }
 
     -- AddChild - append a widget to the layout
@@ -41,6 +51,20 @@ function LDF.CreateStackLayout(parent, direction, spacing)
 
         widget._ldf = widget._ldf or {}
         widget._ldf._layoutOrder = resolvedOrder
+        widget._ldf._layoutParent = self
+
+        if not widget._ldf._layoutHooked then
+            widget:HookScript("OnSizeChanged", function()
+                local owner = widget._ldf._layoutParent
+                if not owner or not owner._ldf then return end
+                if owner._ldf._refreshing then
+                    owner._ldf._dirty = true
+                    return
+                end
+                owner:Refresh()
+            end)
+            widget._ldf._layoutHooked = true
+        end
 
         children[#children + 1] = widget
         self:Refresh()
@@ -59,6 +83,7 @@ function LDF.CreateStackLayout(parent, direction, spacing)
         end
 
         widget:ClearAllPoints()
+        widget._ldf._layoutParent = nil
         self:Refresh()
     end
 
@@ -80,6 +105,12 @@ function LDF.CreateStackLayout(parent, direction, spacing)
 
     -- Refresh - sort and re-anchor all visible children
     function stack:Refresh()
+        if self._ldf._refreshing then
+            self._ldf._dirty = true
+            return
+        end
+        self._ldf._refreshing = true
+
         local cfg = self._ldf
         local children = cfg.children
         local gap = cfg.spacing
@@ -104,6 +135,12 @@ function LDF.CreateStackLayout(parent, direction, spacing)
                     child:SetPoint("TOPLEFT", prevVisible, "BOTTOMLEFT", 0, -gap)
                 else
                     child:SetPoint("TOPLEFT", prevVisible, "TOPRIGHT", gap, 0)
+                end
+
+                if isVertical then
+                    child:SetPoint("RIGHT", self, "RIGHT")
+                else
+                    child:SetPoint("BOTTOM", self, "BOTTOM")
                 end
 
                 local childW = child:GetWidth() or 0
@@ -131,7 +168,27 @@ function LDF.CreateStackLayout(parent, direction, spacing)
             self:SetWidth(totalSize)
         end
 
+        -- Propagate size to scrollChild so ScrollFrame updates scroll range.
+        -- Only applies when the stack's parent is a scroll child (its grandparent
+        -- is a ScrollFrame).
+        local layoutParent = self:GetParent()
+        if layoutParent then
+            local grandparent = layoutParent:GetParent()
+            if grandparent and grandparent:GetObjectType() == "ScrollFrame" then
+                if isVertical then
+                    layoutParent:SetHeight(totalSize)
+                else
+                    layoutParent:SetWidth(totalSize)
+                end
+            end
+        end
+
         LDF.FireCallback("LAYOUT_UPDATED", self)
+        self._ldf._refreshing = false
+        if self._ldf._dirty then
+            self._ldf._dirty = false
+            self:Refresh()
+        end
     end
 
     -- Clear - remove all children and reset size
@@ -139,11 +196,17 @@ function LDF.CreateStackLayout(parent, direction, spacing)
         local children = self._ldf.children
         for i = #children, 1, -1 do
             children[i]:ClearAllPoints()
+            if children[i]._ldf then
+                children[i]._ldf._layoutParent = nil
+            end
             children[i] = nil
         end
 
-        self:SetHeight(0)
-        self:SetWidth(0)
+        if self._ldf.direction == "vertical" then
+            self:SetHeight(0)
+        else
+            self:SetWidth(0)
+        end
     end
 
     return stack

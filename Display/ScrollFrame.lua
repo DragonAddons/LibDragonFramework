@@ -10,7 +10,6 @@ local LDF = LibDragonFramework
 local CreateFrame = CreateFrame
 local math_max = math.max
 local math_min = math.min
-local pcall = pcall
 
 local SCROLLBAR_WIDTH = LDF.heights.SCROLLBAR
 local SCROLL_STEP = LDF.dims.SCROLL_STEP
@@ -80,18 +79,14 @@ function LDF.CreateScrollFrame(parent)
     local scrollChild = CreateFrame("Frame", nil, sf)
     scrollChild:SetHeight(1)
     sf:SetScrollChild(scrollChild)
+    scrollChild:SetWidth(sf:GetWidth())
 
     sf:SetScript("OnSizeChanged", function(self)
         scrollChild:SetWidth(self:GetWidth())
         UpdateScrollRange(wrapper)
     end)
 
-    -- Scrollbar slider (BackdropTemplate with fallback)
-    local ok, scrollbar = pcall(CreateFrame, "Slider", nil, wrapper, "BackdropTemplate")
-    if not ok or not scrollbar then
-        scrollbar = CreateFrame("Slider", nil, wrapper)
-        if BackdropTemplateMixin then Mixin(scrollbar, BackdropTemplateMixin) end
-    end
+    local scrollbar = LDF.CreateBackdropFrame(wrapper, "Slider")
 
     scrollbar:SetPoint("TOPRIGHT", wrapper, "TOPRIGHT", 0, 0)
     scrollbar:SetPoint("BOTTOMRIGHT", wrapper, "BOTTOMRIGHT", 0, 0)
@@ -100,8 +95,6 @@ function LDF.CreateScrollFrame(parent)
     scrollbar:SetMinMaxValues(0, 0)
     scrollbar:SetValue(0)
     scrollbar:SetValueStep(1)
-    LDF.DisablePixelSnap(scrollbar)
-
     scrollbar:SetBackdrop({ bgFile = LDF.WHITE8X8, edgeFile = LDF.WHITE8X8, edgeSize = 1 })
     scrollbar:SetBackdropColor(LDF.GetColor("bg2"))
     scrollbar:SetBackdropBorderColor(LDF.GetColor("border"))

@@ -10,6 +10,7 @@
     <Script file="Theme\Tokens.lua"/>
     <Script file="Theme\Typography.lua"/>
     <Script file="Theme\Backdrop.lua"/>
+    <Script file="Theme\Glow.lua"/>
     <Script file="Theme\Quality.lua"/>
     <Script file="Theme\Spacing.lua"/>
 
