@@ -28,6 +28,7 @@ read_globals = {
     "ITEM_QUALITY_COLORS", "RAID_CLASS_COLORS",
     "InCombatLockdown",
     "GetItemInfo", "GetCursorInfo", "ClearCursor",
+    "geterrorhandler",
     -- Libs
     "LibStub",
 }

@@ -7,9 +7,6 @@
 
 local LDF = LibDragonFramework
 
--- WoW API cache
-local CreateFrame = CreateFrame
-
 -------------------------------------------------------------------------------
 -- Constants
 -------------------------------------------------------------------------------
@@ -36,7 +33,7 @@ function LDF.CreateTextInput(parent, opts)
     label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
 
     -- EditBox below label
-    local editBox = CreateFrame("EditBox", nil, frame, "BackdropTemplate")
+    local editBox = LDF.CreateBackdropFrame(frame, "EditBox")
     editBox:SetSize(inputWidth, LDF.heights.INPUT)
     editBox:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -LABEL_GAP)
     LDF.ApplyBackdrop(editBox, "input")
@@ -113,7 +110,7 @@ function LDF.CreateTextInput(parent, opts)
 
     -- Store refs and initialize
     frame._ldf.editBox = editBox
-    frame._ldf.label = label
+    frame._ldf.labelFS = label
     frame:Refresh()
 
     return frame

@@ -26,12 +26,12 @@ No automated test harness - all testing is manual in-game.
 ### Layers (load order)
 1. **Init.lua** - namespace bootstrap, `_G.LibDragonFramework = LDF`
 2. **Core/** - PixelPerfect, BaseMixin, ObjectPool
-3. **Theme/** - Tokens, Typography, Backdrop, Quality, Spacing
+3. **Theme/** - Tokens, Typography, Backdrop, Glow, Quality, Spacing
 4. **Engine/** - Bindings (widget protocol), Validation, Layout
 5. **Display/** - Window, ScrollFrame, TabGroup, Section
-6. **Widgets/** - Header, Description, Toggle, Slider, Dropdown, ColorPicker, TextInput, Button
+6. **Widgets/** - Header, Description, Toggle, Slider, Dropdown, ColorPicker, TextInput, Button, ItemSlot, ItemList
 
-### File Organization (24 files, ~3300 lines)
+### File Organization (27 files, ~4200 lines)
 
 | Layer | File | Lines |
 |-------|------|------:|
@@ -42,23 +42,26 @@ No automated test harness - all testing is manual in-game.
 | Theme | Tokens.lua | ~151 |
 | Theme | Typography.lua | ~150 |
 | Theme | Backdrop.lua | ~145 |
+| Theme | Glow.lua | ~91 |
 | Theme | Quality.lua | ~127 |
 | Theme | Spacing.lua | ~83 |
 | Engine | Bindings.lua | ~107 |
 | Engine | Validation.lua | ~75 |
-| Engine | Layout.lua | ~150 |
-| Display | Window.lua | ~149 |
+| Engine | Layout.lua | ~210 |
+| Display | Window.lua | ~188 |
 | Display | ScrollFrame.lua | ~143 |
 | Display | TabGroup.lua | ~202 |
-| Display | Section.lua | ~79 |
+| Display | Section.lua | ~157 |
 | Widgets | Header.lua | ~46 |
 | Widgets | Description.lua | ~60 |
 | Widgets | Toggle.lua | ~135 |
 | Widgets | Slider.lua | ~264 |
 | Widgets | Dropdown.lua | ~326 |
-| Widgets | ColorPicker.lua | ~249 |
+| Widgets | ColorPicker.lua | ~247 |
 | Widgets | TextInput.lua | ~120 |
 | Widgets | Button.lua | ~112 |
+| Widgets | ItemSlot.lua | ~189 |
+| Widgets | ItemList.lua | ~289 |
 
 ### Key Rules
 - **One widget per file, max 300 lines**
@@ -70,10 +73,10 @@ No automated test harness - all testing is manual in-game.
 
 ### Widget Protocol
 Every value widget must implement:
-- `widget:SetValue(value)` - set programmatically
-- `widget:GetValue()` - return current value
-- `widget:SetOnValueChanged(fn)` - live callback during interaction
-- `widget:SetOnValueCommitted(fn)` - final callback on confirm
+- `widget:SetValue(...)` - set programmatically; payload may be single-value or multi-value by widget type
+- `widget:GetValue()` - return the current value payload; may return one or more values by widget type
+- `widget:SetOnValueChanged(fn)` - live callback during interaction; `fn` receives the widget value payload
+- `widget:SetOnValueCommitted(fn)` - final callback on confirm; `fn` receives the widget value payload
 - `widget:SetEnabled(enabled)` - enable/disable
 - `widget:SetLabel(text)` - update label
 - `widget:Refresh()` - re-read from opts.get()

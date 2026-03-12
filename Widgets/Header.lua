@@ -26,12 +26,22 @@ function LDF.CreateHeader(parent, text)
     fontString:SetJustifyH("LEFT")
 
     -- Horizontal separator at bottom edge
-    local separator = frame:CreateTexture(nil, "ARTWORK")
+    local separator = frame:CreateTexture(nil, "ARTWORK", nil, 0)
     separator:SetHeight(LDF.heights.SEPARATOR)
     separator:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
     separator:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
-    separator:SetColorTexture(LDF.GetColor("border"))
+    local ar, ag, ab = LDF.GetColor("accentGold")
+    separator:SetColorTexture(ar, ag, ab, 0.8)
     LDF.DisablePixelSnap(separator)
+
+    -- Shadow line below separator for depth
+    local shadowLine = frame:CreateTexture(nil, "ARTWORK", nil, 1)
+    shadowLine:SetTexture(LDF.WHITE8X8)
+    shadowLine:SetHeight(LDF.heights.SEPARATOR)
+    shadowLine:SetVertexColor(LDF.GetColor("shadow"))
+    shadowLine:SetPoint("TOPLEFT", separator, "BOTTOMLEFT")
+    shadowLine:SetPoint("BOTTOMRIGHT", separator, "BOTTOMRIGHT", 0, -LDF.heights.SEPARATOR)
+    LDF.DisablePixelSnap(shadowLine)
 
     -- Internal state
     frame._ldf.fontString = fontString

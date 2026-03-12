@@ -29,11 +29,12 @@ end
 -------------------------------------------------------------------------------
 
 local RECIPES = {
-    panel  = { bg = "bg1",  border = "border",      edgeSize = 1 },
-    widget = { bg = "bg2",  border = "border",      edgeSize = 1 },
-    input  = { bg = "bg2",  border = "borderLight",  edgeSize = 1 },
-    button = { bg = "bg2",  border = "border",      edgeSize = 1 },
-    dark   = { bg = "bg0",  border = "border",      edgeSize = 1 },
+    panel  = { bg = "bg1",       border = "border",      edgeSize = 1 },
+    widget = { bg = "bg2",       border = "border",      edgeSize = 1 },
+    input  = { bg = "bg2",       border = "borderLight", edgeSize = 1 },
+    button = { bg = "bg2",       border = "border",      edgeSize = 1 },
+    dark   = { bg = "bg0",       border = "border",      edgeSize = 1 },
+    header = { bg = "headerBg",  border = "border",      edgeSize = 1 },
 }
 
 -------------------------------------------------------------------------------

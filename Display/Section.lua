@@ -31,30 +31,46 @@ function LDF.CreateSection(parent, title, opts)
     section._header = header
 
     -- Separator line below header
-    local separator = section:CreateTexture(nil, "ARTWORK")
-    separator:SetTexture(LDF.WHITE8X8)
+    local separator = section:CreateTexture(nil, "ARTWORK", nil, 0)
     separator:SetHeight(LDF.heights.SEPARATOR)
-    separator:SetColorTexture(LDF.GetColor("border"))
+    local ar, ag, ab = LDF.GetColor("accentGold")
+    separator:SetColorTexture(ar, ag, ab, 0.8)
     separator:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -LDF.spacing.XS)
     separator:SetPoint("RIGHT", section, "RIGHT")
     LDF.DisablePixelSnap(separator)
     section._separator = separator
 
-    -- Content area below separator
+    -- Shadow line below separator for depth
+    local shadowLine = section:CreateTexture(nil, "ARTWORK", nil, 1)
+    shadowLine:SetTexture(LDF.WHITE8X8)
+    shadowLine:SetHeight(LDF.heights.SEPARATOR)
+    shadowLine:SetVertexColor(LDF.GetColor("shadow"))
+    shadowLine:SetPoint("TOPLEFT", separator, "BOTTOMLEFT")
+    shadowLine:SetPoint("RIGHT", section, "RIGHT")
+    LDF.DisablePixelSnap(shadowLine)
+    section._ldf._shadowLine = shadowLine
+
+    -- Content area below separator (anchored to shadow line, not separator)
     local content = CreateFrame("Frame", nil, section)
-    content:SetPoint("TOPLEFT", separator, "BOTTOMLEFT", 0, -LDF.spacing.SM)
+    content:SetPoint("TOPLEFT", shadowLine, "BOTTOMLEFT", 0, -LDF.spacing.SM)
     content:SetPoint("RIGHT", section, "RIGHT")
     section.content = content
+
+    local function UpdateCollapseButtonHeight()
+        if not section._ldf._collapseBtn then return end
+        local height = header:GetStringHeight() + LDF.spacing.XS + LDF.heights.SEPARATOR * 2
+        section._ldf._collapseBtn:SetHeight(height)
+    end
 
     -- Collapsible header controls
     if section._ldf.collapsible then
         local chevron = LDF.CreateFontString(section, "title", "v")
-        LDF.SetPoint(chevron, "RIGHT", header, "LEFT", -LDF.spacing.XS, 0)
+        LDF.SetPoint(chevron, "TOPLEFT", section, "TOPLEFT", 0, 0)
         section._ldf._chevron = chevron
 
         -- Shift header right to make room for chevron
         header:ClearAllPoints()
-        header:SetPoint("TOPLEFT", section, "TOPLEFT", LDF.spacing.MD, 0)
+        LDF.SetPoint(header, "TOPLEFT", section, "TOPLEFT", LDF.spacing.LG, 0)
 
         -- Clickable overlay on header region
         local collapseBtn = CreateFrame("Button", nil, section)
@@ -76,24 +92,27 @@ function LDF.CreateSection(parent, title, opts)
             end
         end)
         section._ldf._collapseBtn = collapseBtn
+        UpdateCollapseButtonHeight()
     end
 
     -- Height calculation
     function section:UpdateHeight()
         local headerHeight = self._header:GetStringHeight()
         local separatorHeight = LDF.heights.SEPARATOR
+        local shadowHeight = LDF.heights.SEPARATOR
         if self._ldf.collapsed then
-            local total = headerHeight + LDF.spacing.XS + separatorHeight
+            local total = headerHeight + LDF.spacing.XS + separatorHeight + shadowHeight
             self:SetHeight(total)
             return
         end
         local contentHeight = self.content:GetHeight() or 0
-        local total = headerHeight + LDF.spacing.XS + separatorHeight + LDF.spacing.SM + contentHeight
+        local total = headerHeight + LDF.spacing.XS + separatorHeight + shadowHeight + LDF.spacing.SM + contentHeight
         self:SetHeight(total)
     end
 
     function section:SetTitle(text)
         self._header:SetText(text)
+        UpdateCollapseButtonHeight()
         self:UpdateHeight()
     end
 
@@ -136,11 +155,7 @@ function LDF.CreateSection(parent, title, opts)
     -- Initial height calculation (deferred - header needs a frame to measure)
     section:SetScript("OnShow", function(self)
         self:UpdateHeight()
-        if self._ldf._collapseBtn then
-            local h = self._header:GetStringHeight() + LDF.spacing.XS + LDF.heights.SEPARATOR
-            self._ldf._collapseBtn:SetHeight(h)
-        end
-        self:SetScript("OnShow", nil)
+        UpdateCollapseButtonHeight()
     end)
 
     return section

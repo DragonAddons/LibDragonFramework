@@ -8,7 +8,10 @@
 local LDF = LibDragonFramework
 
 local CreateFrame = CreateFrame
+local BackdropTemplateMixin = BackdropTemplateMixin
+local Mixin = Mixin
 local pairs = pairs
+local pcall = pcall
 local type = type
 
 -------------------------------------------------------------------------------
@@ -102,6 +105,19 @@ end
 function LDF.CreateWidgetFrame(parent, frameType, name)
     local frame = CreateFrame(frameType or "Frame", name, parent)
     frame._ldf = {}
+    LDF.DisablePixelSnap(frame)
+    return frame
+end
+
+function LDF.CreateBackdropFrame(parent, frameType, name)
+    local ok, frame = pcall(CreateFrame, frameType or "Frame", name, parent, "BackdropTemplate")
+    if not ok or not frame then
+        frame = CreateFrame(frameType or "Frame", name, parent)
+        if BackdropTemplateMixin then
+            Mixin(frame, BackdropTemplateMixin)
+        end
+    end
+    frame._ldf = frame._ldf or {}
     LDF.DisablePixelSnap(frame)
     return frame
 end

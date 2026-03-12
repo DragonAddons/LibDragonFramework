@@ -55,6 +55,19 @@ local function AttachCloseButton(window)
 end
 
 -------------------------------------------------------------------------------
+-- Accent overlay
+-------------------------------------------------------------------------------
+
+local function CreateAccentOverlay(titleBar)
+    local overlay = titleBar:CreateTexture(nil, "ARTWORK")
+    overlay:SetAllPoints()
+    overlay:SetTexture(LDF.WHITE8X8)
+    overlay:SetVertexColor(LDF.GetColor("accentGold"))
+    overlay:SetAlpha(0.05)
+    return overlay
+end
+
+-------------------------------------------------------------------------------
 -- Title bar
 -------------------------------------------------------------------------------
 
@@ -63,9 +76,13 @@ local function CreateTitleBar(window, titleText)
     LDF.DisablePixelSnap(titleBar)
 
     local titleHeight = LDF.heights.TITLE
-    titleBar:SetPoint("TOPLEFT", window, "TOPLEFT")
-    titleBar:SetPoint("TOPRIGHT", window, "TOPRIGHT")
-    titleBar:SetHeight(titleHeight)
+    LDF.SetPoint(titleBar, "TOPLEFT", window, "TOPLEFT", 0, 0)
+    LDF.SetPoint(titleBar, "TOPRIGHT", window, "TOPRIGHT", 0, 0)
+    LDF.SetHeight(titleBar, titleHeight)
+    LDF.ApplyBackdrop(titleBar, "header")
+
+    -- Subtle accent color wash over header
+    CreateAccentOverlay(titleBar)
 
     titleBar:EnableMouse(true)
     titleBar:RegisterForDrag("LeftButton")
@@ -73,9 +90,9 @@ local function CreateTitleBar(window, titleText)
     titleBar:SetScript("OnDragStop", function() window:StopMovingOrSizing() end)
 
     local titleFs = LDF.CreateFontString(titleBar, "title", titleText)
-    titleFs:SetPoint("LEFT", titleBar, "LEFT", LDF.spacing.LG, 0)
-    titleFs:SetPoint("TOP", titleBar, "TOP")
-    titleFs:SetPoint("BOTTOM", titleBar, "BOTTOM")
+    LDF.SetPoint(titleFs, "LEFT", titleBar, "LEFT", LDF.spacing.LG, 0)
+    LDF.SetPoint(titleFs, "TOP", titleBar, "TOP", 0, 0)
+    LDF.SetPoint(titleFs, "BOTTOM", titleBar, "BOTTOM", 0, 0)
 
     return titleBar, titleFs
 end
@@ -111,11 +128,7 @@ function LDF.CreateWindow(opts)
     local width  = opts.width or DEFAULT_WIDTH
     local height = opts.height or DEFAULT_HEIGHT
 
-    -- Create frame with BackdropTemplate when available
-    local ok, window = pcall(CreateFrame, "Frame", name, UIParent, "BackdropTemplate")
-    if not ok or not window then
-        window = CreateFrame("Frame", name, UIParent)
-    end
+    local window = LDF.CreateBackdropFrame(UIParent, "Frame", name)
 
     LDF.ApplyBackdrop(window, "panel")
     LDF.SetSize(window, width, height)
@@ -127,7 +140,10 @@ function LDF.CreateWindow(opts)
     window:EnableMouse(true)
     window:Hide()
 
-    LDF.DisablePixelSnap(window)
+    window._ldf = window._ldf or {}
+
+    -- Soft shadow glow around entire window
+    LDF.CreateGlow(window)
 
     -- Title bar
     local titleBar, titleFs = CreateTitleBar(window, title)
@@ -161,9 +177,14 @@ function LDF.CreateWindow(opts)
         local data = self._ldf
         if not data then return end
         LDF.UpdatePixels(self)
+        if self._titleBar then
+            LDF.UpdatePixels(self._titleBar)
+        end
+        if self._titleFs then
+            LDF.UpdatePixels(self._titleFs)
+        end
     end
 
-    window._ldf = window._ldf or {}
     window._ldf._width = width
     window._ldf._height = height
 

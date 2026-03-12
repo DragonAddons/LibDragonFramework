@@ -40,16 +40,18 @@ local colors = LDF.colors
 
 colors.bg0         = MakeColor(0.05, 0.05, 0.05, 0.95)  -- deep background
 colors.bg1         = MakeColor(0.08, 0.08, 0.08, 0.95)  -- panel background
-colors.bg2         = MakeColor(0.1,  0.1,  0.1,  0.9)   -- widget background
-colors.border      = MakeColor(0.3,  0.3,  0.3,  1)     -- standard border
-colors.borderLight = MakeColor(0.4,  0.4,  0.4,  1)     -- light border (input focus)
+colors.bg2         = MakeColor(0.15, 0.15, 0.15, 1)     -- widget background
+colors.border      = MakeColor(0,    0,    0,    1)     -- standard border
+colors.borderLight = MakeColor(0.25, 0.25, 0.25, 1)     -- light border (input focus)
 colors.text        = MakeColor(1,    1,    1,    1)      -- primary text
 colors.textMuted   = MakeColor(0.7,  0.7,  0.7,  1)     -- secondary text
 colors.textDim     = MakeColor(0.5,  0.5,  0.5,  1)     -- disabled text
 colors.accentGold  = MakeColor(1,    0.82, 0,    1)      -- Dragon gold accent
 colors.success     = MakeColor(0,    1,    0,    1)      -- green
 colors.danger      = MakeColor(1,    0,    0,    1)      -- red
-colors.highlight   = MakeColor(1,    1,    1,    0.05)   -- subtle hover highlight
+colors.highlight   = MakeColor(1,    1,    1,    0.25)  -- hover highlight
+colors.shadow      = MakeColor(0,    0,    0,    0.25)  -- shadow effects
+colors.headerBg    = MakeColor(0.127, 0.127, 0.127, 1)  -- header background
 
 -------------------------------------------------------------------------------
 -- Quality colors

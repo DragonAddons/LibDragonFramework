@@ -61,8 +61,12 @@ function LDF.CreateObjectPool(createFunc, resetFunc)
     end
 
     function pool:ReleaseAll()
+        local toRelease = {}
         for obj in pairs(self._active) do
-            self:Release(obj)
+            toRelease[#toRelease + 1] = obj
+        end
+        for i = 1, #toRelease do
+            self:Release(toRelease[i])
         end
     end
 

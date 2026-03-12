@@ -7,8 +7,6 @@
 
 local LDF = LibDragonFramework
 
--- WoW API cache
-local CreateFrame = CreateFrame
 local ColorPickerFrame = ColorPickerFrame
 local ShowUIPanel = ShowUIPanel
 local type = type
@@ -70,7 +68,7 @@ end
 -- Build callbacks for picker interaction
 -------------------------------------------------------------------------------
 
-local function BuildCallbacks(opts, swatch, prevColor)
+local function BuildCallbacks(frame, opts, prevColor)
     local swatchFunc = function()
         local newR, newG, newB = ColorPickerFrame:GetColorRGB()
         local newA = 1
@@ -79,8 +77,8 @@ local function BuildCallbacks(opts, swatch, prevColor)
                 and ColorPickerFrame:GetColorAlpha()
                 or ColorPickerFrame.opacity or 0)
         end
-        UpdateSwatch(swatch, newR, newG, newB, newA)
-        if opts.set then opts.set(newR, newG, newB, newA) end
+        UpdateSwatch(frame._ldf.swatch, newR, newG, newB, newA)
+        frame:FireValueChanged(newR, newG, newB, newA)
     end
 
     local cancelFunc = function(prev)
@@ -93,8 +91,8 @@ local function BuildCallbacks(opts, swatch, prevColor)
         else
             pR, pG, pB, pA = prevColor[1], prevColor[2], prevColor[3], prevColor[4]
         end
-        UpdateSwatch(swatch, pR, pG, pB, pA or 1)
-        if opts.set then opts.set(pR, pG, pB, pA or 1) end
+        UpdateSwatch(frame._ldf.swatch, pR, pG, pB, pA or 1)
+        frame:FireValueChanged(pR, pG, pB, pA or 1)
     end
 
     local opacityFunc = function()
@@ -102,8 +100,8 @@ local function BuildCallbacks(opts, swatch, prevColor)
         local oA = 1 - (ColorPickerFrame.GetColorAlpha
             and ColorPickerFrame:GetColorAlpha()
             or ColorPickerFrame.opacity or 0)
-        UpdateSwatch(swatch, oR, oG, oB, oA)
-        if opts.set then opts.set(oR, oG, oB, oA) end
+        UpdateSwatch(frame._ldf.swatch, oR, oG, oB, oA)
+        frame:FireValueChanged(oR, oG, oB, oA)
     end
 
     return swatchFunc, cancelFunc, opacityFunc
@@ -132,7 +130,7 @@ function LDF.CreateColorPicker(parent, opts)
     -- Border frame around swatch
     ---------------------------------------------------------------------------
 
-    local border = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+    local border = LDF.CreateBackdropFrame(frame, "Frame")
     border:SetSize(SWATCH_SIZE + 2, SWATCH_SIZE + 2)
     border:SetPoint("LEFT", label, "RIGHT", LABEL_OFFSET, 0)
     LDF.ApplyBackdrop(border, "widget")
@@ -160,7 +158,7 @@ function LDF.CreateColorPicker(parent, opts)
 
     frame._ldf.swatch = swatch
     frame._ldf.border = border
-    frame._ldf.label = label
+    frame._ldf.labelFS = label
 
     ---------------------------------------------------------------------------
     -- Click handler
@@ -177,7 +175,7 @@ function LDF.CreateColorPicker(parent, opts)
         end
 
         local prevColor = { r, g, b, a }
-        local swatchFunc, cancelFunc, opacityFunc = BuildCallbacks(opts, swatch, prevColor)
+        local swatchFunc, cancelFunc, opacityFunc = BuildCallbacks(frame, opts, prevColor)
 
         if ColorPickerFrame.SetupColorPickerAndShow then
             OpenRetailPicker(r, g, b, a, opts.hasAlpha, swatchFunc, cancelFunc, opacityFunc)
@@ -204,7 +202,6 @@ function LDF.CreateColorPicker(parent, opts)
     function frame:SetValue(r, g, b, a)
         a = a or 1
         UpdateSwatch(self._ldf.swatch, r, g, b, a)
-        if opts.set then opts.set(r, g, b, a) end
     end
 
     ---------------------------------------------------------------------------
