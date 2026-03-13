@@ -95,6 +95,21 @@ LDF is organized in five layers, loaded in strict order:
 
 **Core** provides pixel-snapping math, a mixin system for frame composition, and a generic object pool. **Theme** centralizes all visual tokens (colors, fonts, backdrops, quality mappings, spacing constants). **Engine** defines the widget protocol, validates opts tables, and handles layout calculations. **Display** builds the container hierarchy (windows, scroll regions, tabs, collapsible sections). **Widgets** implement the individual controls that consumers interact with.
 
+## Layout Pattern
+
+The recommended layout model is:
+
+```text
+Window > TabGroup > ScrollFrame > StackLayout(sections) > Section(grid contents)
+```
+
+- Use `LDF.CreateStackLayout(...)` to stack sections vertically.
+- Use `LDF.CreateSection(...)` for each titled group.
+- Each section exposes an internal grid layout through section helper methods.
+- Add widgets through `section:AddChild(...)` when you want the section to manage placement and height automatically.
+- `section.content` remains the raw content frame for backward-compatible manual layouts.
+- Grid height syncing starts when you use the section layout helpers. Manual layouts can keep resizing `section.content` directly.
+
 ## Widget Catalog
 
 | Widget | Factory | Type | Description |
@@ -219,7 +234,65 @@ All value widgets implement:
 | TabGroup | `LDF.CreateTabGroup(parent, opts)` | Horizontal tab bar that swaps child panels |
 | Section | `LDF.CreateSection(parent, title, opts)` | Collapsible group with header |
 
-Containers can nest freely. A typical layout is Window > TabGroup > ScrollFrame > widgets.
+Containers can nest freely. The preferred pattern is Window > TabGroup > ScrollFrame > StackLayout(sections) > Section(grid contents).
+
+### StackLayout
+
+```lua
+LDF.CreateStackLayout(parent, direction, spacing)
+```
+
+Linear auto-flow layout used primarily for stacking sections or other top-level blocks.
+
+**Methods:**
+
+| Method | Description |
+| ------ | ----------- |
+| `AddChild(widget, order)` | Add a child using stack ordering |
+| `RemoveChild(widget)` | Remove a child from the stack |
+| `GetChildren()` | Return a shallow copy of layout children |
+| `SetSpacing(spacing)` | Update spacing between children |
+| `Refresh()` | Recalculate anchors and total size |
+| `Clear()` | Remove all children from the layout |
+
+### GridLayout
+
+```lua
+LDF.CreateGridLayout(parent, columnsOrOpts, spacing)
+```
+
+Grid auto-flow layout used for section content.
+
+Supported forms:
+
+```lua
+LDF.CreateGridLayout(parent, 2, 8)
+LDF.CreateGridLayout(parent, {
+    columns = 2,
+    spacing = 8,
+    rowSpacing = 8,
+    columnSpacing = 8,
+})
+```
+
+- Defaults to 2 columns
+- Defaults spacing to `LDF.spacing.MD`
+- Children flow left-to-right, then top-to-bottom
+- Child span defaults to 1
+- Pass `span` to `AddChild(widget, order, span)` to span multiple columns
+- `widget._ldf.opts.span` is honored unless `AddChild(..., ..., span)` passes an explicit span
+
+**Methods:**
+
+| Method | Description |
+| ------ | ----------- |
+| `AddChild(widget, order, span)` | Add a child with optional sort order and column span |
+| `RemoveChild(widget)` | Remove a child from the grid |
+| `GetChildren()` | Return a shallow copy of layout children |
+| `SetColumns(columns)` | Update the number of columns |
+| `SetSpacing(spacing)` | Set both row and column spacing |
+| `Refresh()` | Recalculate grid placement and height |
+| `Clear()` | Remove all children from the layout |
 
 ### Window
 
@@ -246,6 +319,12 @@ Titled content group with separator line. Content goes inside `section.content` 
 
 - `opts.collapsible` (bool) - adds a chevron indicator and clickable header region
 - `opts.collapsed` (bool) - initial collapsed state (default false)
+- `opts.columns` (number) - internal grid columns (default 2)
+- `opts.spacing` (number) - shared internal grid spacing (default `LDF.spacing.MD`)
+- `opts.rowSpacing` (number) - internal grid row spacing override
+- `opts.columnSpacing` (number) - internal grid column spacing override
+
+Each section owns an internal `GridLayout` inside `section.content`, available through the section helper methods. New code should usually add widgets through the section methods instead of manually anchoring every child. `section.content` is still available for manual layouts, and manual resizing of that frame continues to drive `section:UpdateHeight()`. Automatic height syncing from the internal grid happens after you opt in by using the section layout helpers.
 
 **Methods:**
 
@@ -253,6 +332,13 @@ Titled content group with separator line. Content goes inside `section.content` 
 | ------ | ----------- |
 | `SetTitle(text)` | Update the section header |
 | `GetContent()` | Return the content frame |
+| `GetLayout()` | Return the internal grid layout |
+| `AddChild(widget, order, span)` | Add a widget to the internal grid |
+| `RemoveChild(widget)` | Remove a widget from the internal grid |
+| `GetChildren()` | Return the grid children |
+| `SetColumns(columns)` | Update internal grid columns |
+| `SetSpacing(spacing)` | Set internal grid row and column spacing |
+| `RefreshLayout()` | Refresh the internal grid layout |
 | `UpdateHeight()` | Recalculate section height from content |
 
 **Additional methods when `opts.collapsible = true`:**
@@ -264,6 +350,46 @@ Titled content group with separator line. Content goes inside `section.content` 
 | `IsCollapsed()` | Return whether the section is collapsed |
 
 **Callback:** `SECTION_TOGGLED` fires via `LDF.FireCallback` when a collapsible section is toggled, receiving the section frame and the collapsed state.
+
+### Layout Example
+
+```lua
+local window = LDF.CreateWindow({
+    name = "MyAddonOptions",
+    title = "My Addon Options",
+    width = 500,
+    height = 600,
+})
+
+local scrollFrame = LDF.CreateScrollFrame(window.content)
+scrollFrame:SetAllPoints(window.content)
+
+local sections = LDF.CreateStackLayout(scrollFrame.scrollChild, "vertical", LDF.spacing.LG)
+
+local generalSection = LDF.CreateSection(sections, "General", {
+    columns = 2,
+    spacing = LDF.spacing.MD,
+})
+sections:AddChild(generalSection, 1)
+
+local enableToggle = LDF.CreateToggle(generalSection.content, {
+    label = "Enable Feature",
+    get = function() return MyAddonDB.enabled end,
+    set = function(value) MyAddonDB.enabled = value end,
+})
+
+local modeDropdown = LDF.CreateDropdown(generalSection.content, {
+    label = "Mode",
+    get = function() return MyAddonDB.mode end,
+    set = function(value) MyAddonDB.mode = value end,
+})
+
+local description = LDF.CreateDescription(generalSection.content, "This spans both columns.")
+
+generalSection:AddChild(enableToggle, 1)
+generalSection:AddChild(modeDropdown, 2)
+generalSection:AddChild(description, 3, 2)
+```
 
 ## Theme Customization
 

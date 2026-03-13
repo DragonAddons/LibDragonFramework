@@ -70,6 +70,7 @@ No automated test harness - all testing is manual in-game.
 - **Namespace internal state under `self._ldf`** to avoid frame field collisions
 - **Pixel-snap disabling scoped to LDF regions only** - no global metatable hooks
 - **Composition over inheritance** - mixins, not class hierarchies
+- **Layout philosophy** - stack sections vertically, then use grids inside sections for content
 
 ### Widget Protocol
 Every value widget must implement:
@@ -97,6 +98,12 @@ means only one dropdown can be open at a time by design.
 
 ### Opts Contract
 Preserved from Dragon addons: `{ label, tooltip, get, set, order, disabled }`
+
+### Layout Guidance
+- Keep `LDF.CreateStackLayout(...)` behavior stable for outer stacking
+- Prefer `LDF.CreateGridLayout(...)` for content regions and section internals
+- `LDF.CreateSection(...)` should expose `section.content` for compatibility, but new child placement should usually go through `section:AddChild(...)`
+- Layout-managed widgets should keep ordering and span state under `_ldf`
 
 ## Common Pitfalls
 - **Don't use `ns.LDF`** from consuming addons - `ns` is private per-TOC. Always use `_G.LibDragonFramework`.
