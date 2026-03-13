@@ -17,13 +17,16 @@ function LDF.CreateSection(parent, title, opts)
     if not parent then error("CreateSection: 'parent' must not be nil", 2) end
     if not title then error("CreateSection: 'title' must not be nil", 2) end
 
+    opts = opts or {}
+
     local section = LDF.CreateWidgetFrame(parent, "Frame")
     section:SetPoint("TOPLEFT", parent, "TOPLEFT")
     section:SetPoint("RIGHT", parent, "RIGHT")
 
     section._ldf = section._ldf or {}
-    section._ldf.collapsible = opts and opts.collapsible or false
+    section._ldf.collapsible = opts.collapsible or false
     section._ldf.collapsed = false
+    section._ldf.usesGrid = false
 
     -- Header text (gold title preset)
     local header = LDF.CreateFontString(section, "title", title)
@@ -55,6 +58,36 @@ function LDF.CreateSection(parent, title, opts)
     content:SetPoint("TOPLEFT", shadowLine, "BOTTOMLEFT", 0, -LDF.spacing.SM)
     content:SetPoint("RIGHT", section, "RIGHT")
     section.content = content
+
+    -- `section.content` remains the raw content frame for backward compatibility.
+    -- The internal grid only takes ownership of content height after callers opt
+    -- in through the section layout helpers. Once opted in, grid management stays
+    -- enabled even if the grid later becomes empty so behavior remains predictable.
+    local contentLayout = LDF.CreateGridLayout(content, {
+        columns = opts.columns or 2,
+        spacing = opts.spacing or LDF.spacing.MD,
+        rowSpacing = opts.rowSpacing,
+        columnSpacing = opts.columnSpacing,
+    })
+    section._ldf.layout = contentLayout
+
+    content:SetScript("OnSizeChanged", function()
+        if not section.UpdateHeight then return end
+        section:UpdateHeight()
+    end)
+
+    local function MarkSectionUsesGrid()
+        section._ldf.usesGrid = true
+    end
+
+    local function SyncGridContentHeight()
+        if not section._ldf.usesGrid then return end
+
+        local layoutHeight = contentLayout:GetHeight() or 0
+        content:SetHeight(layoutHeight)
+    end
+
+    contentLayout:HookScript("OnSizeChanged", SyncGridContentHeight)
 
     local function UpdateCollapseButtonHeight()
         if not section._ldf._collapseBtn then return end
@@ -143,20 +176,54 @@ function LDF.CreateSection(parent, title, opts)
     end
 
     -- Apply initial collapsed state from opts
-    if opts and opts.collapsed then
+    if opts.collapsed then
         section:SetCollapsed(true)
     end
 
-    -- Auto-update height when content resizes
-    content:SetScript("OnSizeChanged", function()
-        section:UpdateHeight()
-    end)
+    function section:AddChild(widget, order, span)
+        MarkSectionUsesGrid()
+        self._ldf.layout:AddChild(widget, order, span)
+    end
+
+    function section:RemoveChild(widget)
+        MarkSectionUsesGrid()
+        self._ldf.layout:RemoveChild(widget)
+    end
+
+    function section:GetChildren()
+        return self._ldf.layout:GetChildren()
+    end
+
+    function section:SetColumns(columns)
+        MarkSectionUsesGrid()
+        self._ldf.layout:SetColumns(columns)
+    end
+
+    function section:SetSpacing(spacing)
+        MarkSectionUsesGrid()
+        self._ldf.layout:SetSpacing(spacing)
+    end
+
+    function section:RefreshLayout()
+        MarkSectionUsesGrid()
+        self._ldf.layout:Refresh()
+    end
+
+    function section:GetLayout()
+        return self._ldf.layout
+    end
 
     -- Initial height calculation (deferred - header needs a frame to measure)
     section:SetScript("OnShow", function(self)
+        if self._ldf.usesGrid then
+            self._ldf.layout:Refresh()
+            SyncGridContentHeight()
+        end
         self:UpdateHeight()
         UpdateCollapseButtonHeight()
     end)
+
+    SyncGridContentHeight()
 
     return section
 end
