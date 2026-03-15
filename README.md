@@ -1,7 +1,7 @@
 # LibDragonFramework
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
-[![Lint](https://img.shields.io/github/actions/workflow/status/DragonAddons/LibDragonFramework/lint.yml?label=lint&style=flat-square)](https://github.com/DragonAddons/LibDragonFramework/actions/workflows/lint.yml)
+[![Lint](https://img.shields.io/github/actions/workflow/status/Xerrion/LibDragonFramework/lint.yml?label=lint&style=flat-square)](https://github.com/Xerrion/LibDragonFramework/actions/workflows/lint.yml)
 
 Standalone options UI framework for World of Warcraft addons.
 
@@ -29,7 +29,7 @@ LibDragonFramework (LDF) provides a themed options panel system with no Ace3 dep
 ### Embed as a submodule
 
 ```bash
-git submodule add https://github.com/DragonAddons/LibDragonFramework Libs/LibDragonFramework
+git submodule add https://github.com/Xerrion/LibDragonFramework Libs/LibDragonFramework
 ```
 
 Then load it in your `.toc`:
