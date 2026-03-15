@@ -142,7 +142,8 @@ Preserved from Dragon addons: `{ label, tooltip, get, set, order, disabled }`
 | Workflow | Trigger | Action |
 |----------|---------|--------|
 | `lint.yml` | `pull_request_target` to master | Runs luacheck via `Xerrion/wow-workflows/.github/workflows/lint.yml` |
-| `release.yml` | Push to master | Runs release-please + packager via `Xerrion/wow-workflows/.github/workflows/release.yml` |
+| `release.yml` | Push to master | release-please PR via `Xerrion/wow-workflows`; dispatches `packager.yml` on release |
+| `packager.yml` | `workflow_dispatch` (from release.yml) | BigWigsMods packager via `Xerrion/wow-workflows` reusable workflow |
 
 ### Branch Protection
 - `master` requires passing luacheck before merge
